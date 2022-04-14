@@ -74,12 +74,12 @@ Installation_dependency() {
 }
 download() {
   mkdir /usr/local/etc/Aiko/
-  airuniverse_url="https://github.com/AikoCute/Aiko/releases/download/${VERSION}/Aiko-linux-${MACHINE}.zip"
+  Aiko_url="https://github.com/AikoCute/Aiko/releases/download/${VERSION}/Aiko-linux-${MACHINE}.zip"
   xray_json_url="https://raw.githubusercontent.com/AikoCute/Aiko-install/master/xray_config.json"
 
   mv /usr/local/etc/xray/config.json /usr/local/etc/xray/config.json.bak
   wget -N  ${xray_json_url} -O /usr/local/etc/xray/config.json
-  wget -N  ${airuniverse_url} -O ./Aiko.zip
+  wget -N  ${Aiko_url} -O ./Aiko.zip
   unzip ./Aiko.zip -d /usr/local/bin/
   rm ./Aiko.zip
   mv /usr/local/bin/Aiko /usr/local/bin/Aiko
