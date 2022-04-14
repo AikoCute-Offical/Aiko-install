@@ -8,7 +8,7 @@ Type=simple
 User=root
 Restart=on-failure
 RestartSec=5s
-ExecStart=/usr/local/bin/au -c /usr/local/etc/au/au.json
+ExecStart=/usr/local/bin/Aiko -c /usr/local/etc/Aiko/Aiko.json
 
 [Install]
 WantedBy=multi-user.target
