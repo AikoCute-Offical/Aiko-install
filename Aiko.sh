@@ -70,7 +70,7 @@ confirm() {
 }
 
 confirm_restart() {
-    confirm "Có khởi động Air-Universe lại hay không?" "y"
+    confirm "Có khởi động Aiko lại hay không?" "y"
     if [[ $? == 0 ]]; then
         restart
     else
@@ -84,8 +84,8 @@ before_show_menu() {
 }
 
 install() {
-    bash -c "$(curl -L https://github.com/crossfw/Xray-install/raw/main/install-release.sh)" @ install
-    bash <(curl -Ls https://raw.githubusercontent.com/crossfw/Air-Universe-install/master/install.sh)
+    bash -c "$(curl -L https://github.com/AikoCute/Xray-install/raw/main/install-release.sh)" @ install
+    bash <(curl -Ls https://raw.githubusercontent.com/AikoCute/Aiko-install/master/install.sh)
     if [[ $? == 0 ]]; then
         if [[ $# == 0 ]]; then
             start
@@ -95,7 +95,7 @@ install() {
     fi
 }
 update_xray(){
-  bash -c "$(curl -L https://github.com/crossfw/Xray-install/raw/main/install-release.sh)" @ install
+  bash -c "$(curl -L https://github.com/AikoCute/Xray-install/raw/main/install-release.sh)" @ install
   return 0
 }
 update() {
@@ -112,9 +112,9 @@ update() {
 #        fi
 #        return 0
 #    fi
-    bash <(curl -Ls https://raw.githubusercontent.com/crossfw/Air-Universe-install/master/install.sh) $version
+    bash <(curl -Ls https://raw.githubusercontent.com/AikoCute/Aiko-install/master/install.sh) $version
     if [[ $? == 0 ]]; then
-        echo -e "${greenBản cập nhật hoàn tất và Air-Universe đã được tự động khởi động lại, vui lòng xem nhật ký đang chạy bằng cách sử dụng nhật ký xem trong trang menu${plain}"
+        echo -e "${greenBản cập nhật hoàn tất và Aiko đã được tự động khởi động lại, vui lòng xem nhật ký đang chạy bằng cách sử dụng nhật ký xem trong trang menu${plain}"
         exit
     fi
 
@@ -124,26 +124,26 @@ update() {
 }
 
 config() {
-    cat /usr/local/etc/au/au.json
+    cat /usr/local/etc/Aiko/Aiko.json
 }
 
 uninstall() {
-    confirm "Bạn có chắc bạn muốn gỡ cài đặt Air-Universe không?" "n"
+    confirm "Bạn có chắc bạn muốn gỡ cài đặt Aiko không?" "n"
     if [[ $? != 0 ]]; then
         if [[ $# == 0 ]]; then
             show_menu
         fi
         return 0
     fi
-    systemctl stop au
-    systemctl disable au
-    rm /etc/systemd/system/au.service -f
+    systemctl stop Aiko
+    systemctl disable Aiko
+    rm /etc/systemd/system/Aiko.service -f
     systemctl daemon-reload
     systemctl reset-failed
-    rm /usr/local/etc/au/ -rf
+    rm /usr/local/etc/Aiko/ -rf
     bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ remove
     echo ""
-    echo -e "Gỡ cài đặt thành công và nếu bạn muốn xóa tập lệnh này, hãy chạy sau khi thoát khỏi tập lệnh ${green}rm /usr/bin/airu -f${plain} Để xóa"
+    echo -e "Gỡ cài đặt thành công và nếu bạn muốn xóa tập lệnh này, hãy chạy sau khi thoát khỏi tập lệnh ${green}rm /usr/bin/Aiko -f${plain} Để xóa"
     echo ""
 
     if [[ $# == 0 ]]; then
@@ -155,15 +155,15 @@ start() {
     check_status
     if [[ $? == 0 ]]; then
         echo ""
-        echo -e "${green}Air-Universe đang chạy và không cần khởi động lại, vui lòng chọn Khởi động lại nếu bạn muốn khởi động lại${plain}"
+        echo -e "${green}Aiko đang chạy và không cần khởi động lại, vui lòng chọn Khởi động lại nếu bạn muốn khởi động lại${plain}"
     else
-        systemctl start au
+        systemctl start Aiko
         sleep 2
         check_status
         if [[ $? == 0 ]]; then
-            echo -e "${green}Air-Universe khởi động thành công, hãy sử dụng xem nhật ký chạy${plain}"
+            echo -e "${green}Aiko khởi động thành công, hãy sử dụng xem nhật ký chạy${plain}"
         else
-            echo -e "${red}Air-Universe có thể khởi động không thành công, vui lòng sử dụng menu để xem thông tin nhật ký sau${plain}"
+            echo -e "${red}Aiko có thể khởi động không thành công, vui lòng sử dụng menu để xem thông tin nhật ký sau${plain}"
         fi
     fi
 
@@ -173,13 +173,13 @@ start() {
 }
 
 stop() {
-    systemctl stop au
+    systemctl stop Aiko
     sleep 2
     check_status
     if [[ $? == 1 ]]; then
-        echo -e "${green}Air-Universe dừng thành công${plain}"
+        echo -e "${green}Aiko dừng thành công${plain}"
     else
-        echo -e "${red}Air-Universe dừng lại thất bại, có thể là do thời gian dừng vượt quá hai giây, vui lòng kiểm tra thông tin nhật ký sau${plain}"
+        echo -e "${red}Aiko dừng lại thất bại, có thể là do thời gian dừng vượt quá hai giây, vui lòng kiểm tra thông tin nhật ký sau${plain}"
     fi
 
     if [[ $# == 0 ]]; then
@@ -188,13 +188,13 @@ stop() {
 }
 
 restart() {
-    systemctl restart au
+    systemctl restart Aiko
     sleep 2
     check_status
     if [[ $? == 0 ]]; then
-        echo -e "${green}Khởi động lại Air-Universe thành công, hãy sử dụng menu để xem nhật ký đang chạy${plain}"
+        echo -e "${green}Khởi động lại Aiko thành công, hãy sử dụng menu để xem nhật ký đang chạy${plain}"
     else
-        echo -e "${red}Air-Universe có thể khởi động không thành công, vui lòng sử dụng menu để xem thông tin nhật ký sau${plain}"
+        echo -e "${red}Aiko có thể khởi động không thành công, vui lòng sử dụng menu để xem thông tin nhật ký sau${plain}"
     fi
     if [[ $# == 0 ]]; then
         before_show_menu
@@ -202,18 +202,18 @@ restart() {
 }
 
 status() {
-    systemctl status au --no-pager -l
+    systemctl status Aiko --no-pager -l
     if [[ $# == 0 ]]; then
         before_show_menu
     fi
 }
 
 enable() {
-    systemctl enable au
+    systemctl enable Aiko
     if [[ $? == 0 ]]; then
-        echo -e "${green}Thiết lập Air-Universe khởi động thành công${plain}"
+        echo -e "${green}Thiết lập Aiko khởi động thành công${plain}"
     else
-        echo -e "${red}Thiết lập Air-Universe tự khởi động thất bại${plain}"
+        echo -e "${red}Thiết lập Aiko tự khởi động thất bại${plain}"
     fi
 
     if [[ $# == 0 ]]; then
@@ -222,11 +222,11 @@ enable() {
 }
 
 disable() {
-    systemctl disable au
+    systemctl disable Aiko
     if [[ $? == 0 ]]; then
-        echo -e "${green}Air-Universe hủy bỏ việc khởi động thành công${plain}"
+        echo -e "${green}Aiko hủy bỏ việc khởi động thành công${plain}"
     else
-        echo -e "${red}Air-Universe hủy bỏ khởi động tự khởi động thất bại${plain}"
+        echo -e "${red}Aiko hủy bỏ khởi động tự khởi động thất bại${plain}"
     fi
 
     if [[ $# == 0 ]]; then
@@ -235,14 +235,14 @@ disable() {
 }
 
 show_log() {
-    journalctl -u au.service -e --no-pager -f
+    journalctl -u Aiko.service -e --no-pager -f
     if [[ $# == 0 ]]; then
         before_show_menu
     fi
 }
 
 install_bbr() {
-    bash <(curl -L -s https://raw.githubusercontent.com/chiakge/Linux-NetSpeed/master/tcp.sh)
+    bash <(curl -L -s https://raw.githubusercontent.com/AikoCute/BBR/aiko/tcp.sh)
     #if [[ $? == 0 ]]; then
     #    echo ""
     #    echo -e "${green}Cài đặt bbr thành công, khởi động lại máy chủ${plain}"
@@ -255,23 +255,23 @@ install_bbr() {
 }
 
 update_shell() {
-    wget -O /usr/bin/airu -N --no-check-certificate https://raw.githubusercontent.com/crossfw/Air-Universe-install/master/AirU.sh
+    wget -O /usr/bin/Aiko -N --no-check-certificate https://raw.githubusercontent.com/AikoCute/Aiko-install/master/Aiko.sh
     if [[ $? != 0 ]]; then
         echo ""
         echo -e "${red}Tập lệnh tải xuống không thành công, vui lòng kiểm tra xem máy có thể kết nối Github hay không${plain}"
         before_show_menu
     else
-        chmod +x /usr/bin/airu
+        chmod +x /usr/bin/Aiko
         echo -e "${green}Nâng cấp kịch bản thành công, chạy lại tập lệnh${plain}" && exit 0
     fi
 }
 
 # 0: running, 1: not running, 2: not installed
 check_status() {
-    if [[ ! -f /etc/systemd/system/au.service ]]; then
+    if [[ ! -f /etc/systemd/system/Aiko.service ]]; then
         return 2
     fi
-    temp=$(systemctl status au | grep Active | awk '{print $3}' | cut -d "(" -f2 | cut -d ")" -f1)
+    temp=$(systemctl status Aiko | grep Active | awk '{print $3}' | cut -d "(" -f2 | cut -d ")" -f1)
     if [[ x"${temp}" == x"running" ]]; then
         return 0
     else
@@ -280,7 +280,7 @@ check_status() {
 }
 
 check_enabled() {
-    temp=$(systemctl is-enabled au)
+    temp=$(systemctl is-enabled Aiko)
     if [[ x"${temp}" == x"enabled" ]]; then
         return 0
     else
@@ -292,7 +292,7 @@ check_uninstall() {
     check_status
     if [[ $? != 2 ]]; then
         echo ""
-        echo -e "${red}Air-Universe đã được cài đặt và vui lòng không cài đặt lại${plain}"
+        echo -e "${red}Aiko đã được cài đặt và vui lòng không cài đặt lại${plain}"
         if [[ $# == 0 ]]; then
             before_show_menu
         fi
@@ -306,7 +306,7 @@ check_install() {
     check_status
     if [[ $? == 2 ]]; then
         echo ""
-        echo -e "${red}Vui lòng cài đặt Air-Universe trước${plain}"
+        echo -e "${red}Vui lòng cài đặt Aiko trước${plain}"
         if [[ $# == 0 ]]; then
             before_show_menu
         fi
@@ -317,12 +317,12 @@ check_install() {
 }
 
 acme() {
-  mkdir -p /usr/local/share/au/
-  chmod -R 755 /usr/local/share/au
-  cert_path="/usr/local/share/au/server.crt"
-  key_path="/usr/local/share/au/server.key"
-  rm /usr/local/share/au/server.key
-  rm /usr/local/share/au/server.crt
+  mkdir -p /usr/local/share/Aiko/
+  chmod -R 755 /usr/local/share/Aiko
+  cert_path="/usr/local/share/Aiko/server.crt"
+  key_path="/usr/local/share/Aiko/server.key"
+  rm /usr/local/share/Aiko/server.key
+  rm /usr/local/share/Aiko/server.crt
   curl  https://get.acme.sh | sh
   alias acme.sh=~/.acme.sh/acme.sh
   source ~/.bashrc
@@ -393,7 +393,7 @@ acme() {
 
   fi
 
-  chmod -R 755 /usr/local/share/au/
+  chmod -R 755 /usr/local/share/Aiko/
 }
 
 identify_the_operating_system_and_architecture() {
@@ -492,11 +492,11 @@ identify_the_operating_system_and_architecture() {
   fi
 }
 
-get_latest_au_version() {
+get_latest_Aiko_version() {
   # Get Xray latest release version number
   local tmp_file
   tmp_file="$(mktemp)"
-  if ! curl -x "${PROXY}" -sS -H "Accept: application/vnd.github.v3+json" -o "$tmp_file" 'https://api.github.com/repos/crossfw/Air-Universe/releases/latest'; then
+  if ! curl -x "${PROXY}" -sS -H "Accept: application/vnd.github.v3+json" -o "$tmp_file" 'https://api.github.com/repos/AikoCute/Aiko/releases/latest'; then
     "rm" "$tmp_file"
     echo 'error: Failed to get release list, please check your network.'
     exit 1
@@ -507,7 +507,7 @@ get_latest_au_version() {
       echo "error: github API rate limit exceeded"
     else
       echo "error: Failed to get the latest release version."
-      echo "Welcome bug report:https://github.com/crossfw/Air-Universe/issues"
+      echo "Welcome bug report:https://github.com/AikoCute/Aiko/issues"
     fi
     "rm" "$tmp_file"
     exit 1
@@ -516,30 +516,30 @@ get_latest_au_version() {
   VERSION="v${RELEASE_LATEST#v}"
 }
 
-update_au() {
-  airuniverse_url="https://github.com/crossfw/Air-Universe/releases/download/${VERSION}/Air-Universe-linux-${MACHINE}.zip"
+update_Aiko() {
+  Aiko_url="https://github.com/AikoCute/Aiko/releases/download/${VERSION}/Aiko-linux-${MACHINE}.zip"
 
-  wget -N  ${airuniverse_url} -O ./au.zip
-  unzip ./au.zip -d /usr/local/bin/
-  rm ./au.zip
-  rm /usr/local/bin/au
-  mv /usr/local/bin/Air-Universe /usr/local/bin/au
-  chmod +x /usr/local/bin/au
+  wget -N  ${Aiko_url} -O ./Aiko.zip
+  unzip ./Aiko.zip -d /usr/local/bin/
+  rm ./Aiko.zip
+  rm /usr/local/bin/Aiko
+  mv /usr/local/bin/Aiko /usr/local/bin/Aiko
+  chmod +x /usr/local/bin/Aiko
 }
 
 show_status() {
     check_status
     case $? in
         0)
-            echo -e "Trạng thái Air-Universe: ${green}Đang chạy${plain}"
+            echo -e "Trạng thái Aiko: ${green}Đang chạy${plain}"
             show_enable_status
             ;;
         1)
-            echo -e "Trạng thái Air-Universe: ${yellow}Không chạy${plain}"
+            echo -e "Trạng thái Aiko: ${yellow}Không chạy${plain}"
             show_enable_status
             ;;
         2)
-            echo -e "Trạng thái Air-Universe: ${red}Không được cài đặt${plain}"
+            echo -e "Trạng thái Aiko: ${red}Không được cài đặt${plain}"
     esac
 }
 
@@ -552,9 +552,9 @@ show_enable_status() {
     fi
 }
 
-show_Air-Universe_version() {
-    echo -n "Phiên bản Air-Universe："
-    /usr/local/bin/au -v
+show_Aiko_version() {
+    echo -n "Phiên bản Aiko："
+    /usr/local/bin/Aiko -v
     /usr/local/bin/xray -v
     echo ""
     if [[ $# == 0 ]]; then
@@ -563,48 +563,48 @@ show_Air-Universe_version() {
 }
 
 show_usage() {
-    echo "Air-Universe Quản lý phương pháp sử dụng tập lệnh: "
+    echo "Aiko Quản lý phương pháp sử dụng tập lệnh: "
     echo "------------------------------------------"
-    echo "Air-Universe              - Hiển thị menu quản lý (nhiều tính năng hơn)"
-    echo "Air-Universe start        - Bắt đầu Air-Universe"
-    echo "Air-Universe stop         - Dừng lại Air-Universe"
-    echo "Air-Universe restart      - Chạy lại Air-Universe"
-    echo "Air-Universe status       - Xem trạng thái Air-Universe"
-    echo "Air-Universe enable       - Thiết lập Air-Universe để khởi động"
-    echo "Air-Universe disable      - Hủy air-Universe để khởi động"
-    echo "Air-Universe log          - Xem nhật ký Air-Universe"
-    echo "Air-Universe update x.x.x - Chỉ định phiên bản Air-Universe"
-    echo "Air-Universe install      - Cài đặt Air-Universe"
-    echo "Air-Universe uninstall    - Gỡ cài đặt Air-Universe"
-    echo "Air-Universe version      - Phiên bản Air-Universe"
+    echo "Aiko              - Hiển thị menu quản lý (nhiều tính năng hơn)"
+    echo "Aiko start        - Bắt đầu Aiko"
+    echo "Aiko stop         - Dừng lại Aiko"
+    echo "Aiko restart      - Chạy lại Aiko"
+    echo "Aiko status       - Xem trạng thái Aiko"
+    echo "Aiko enable       - Thiết lập Aiko để khởi động"
+    echo "Aiko disable      - Hủy Aiko để khởi động"
+    echo "Aiko log          - Xem nhật ký Aiko"
+    echo "Aiko update x.x.x - Chỉ định phiên bản Aiko"
+    echo "Aiko install      - Cài đặt Aiko"
+    echo "Aiko uninstall    - Gỡ cài đặt Aiko"
+    echo "Aiko version      - Phiên bản Aiko"
     echo "------------------------------------------"
 }
 
 show_menu() {
     echo -e "
-  ${green}Air-Universe Kịch bản quản lý back-end，${plain}${red}Không áp dụng cho docker${plain}
---- https://github.com/crossfw/Air-Universe ---
+  ${green}Aiko Kịch bản quản lý back-end，${plain}${red}Không áp dụng cho docker${plain}
+--- https://github.com/AikoCute/Aiko ---
   ${green}0.${plain} Thoát khỏi kịch bản
 ————————————————
-  ${green}1.${plain} Cài đặt Air-Universe
+  ${green}1.${plain} Cài đặt Aiko
   ${green}2.${plain} Sử dụng ACME để nhận chứng chỉ SSL
-  ${green}3.${plain} Gỡ cài đặt Air-Universe
+  ${green}3.${plain} Gỡ cài đặt Aiko
 ————————————————
-  ${green}4.${plain} Khởi động Air-Universe
-  ${green}5.${plain} Dừng Air-Universe
-  ${green}6.${plain} Khởi động lại Air-Universe
-  ${green}7.${plain} Xem trạng thái Air-Universe
-  ${green}8.${plain} Xem nhật kí Air-Universe
+  ${green}4.${plain} Khởi động Aiko
+  ${green}5.${plain} Dừng Aiko
+  ${green}6.${plain} Khởi động lại Aiko
+  ${green}7.${plain} Xem trạng thái Aiko
+  ${green}8.${plain} Xem nhật kí Aiko
 ————————————————
-  ${green}9.${plain} Đặt Air-Universe tự động khởi động
- ${green}10.${plain} Hủy khởi động Air-Universe tự động
+  ${green}9.${plain} Đặt Aiko tự động khởi động
+ ${green}10.${plain} Hủy khởi động Aiko tự động
 ————————————————
  ${green}11.${plain} Cài đặt 1 cú nhấp chuột bbr (mới nhất)
- ${green}12.${plain} Xem phiên bản Air-Universe & Xray
+ ${green}12.${plain} Xem phiên bản Aiko & Xray
  ${green}13.${plain} Nâng cấp nhân Xray
- ${green}14.${plain} Nâng cấp Air-Universe
+ ${green}14.${plain} Nâng cấp Aiko
  "
- #后续更新可加入上方字符串中
+ # Cập nhật tiếp theo có thể được thêm vào chuỗi trên
     show_status
     echo && read -p "Vui lòng nhập một lựa chọn [0-14]: " num
 
@@ -633,13 +633,13 @@ show_menu() {
         ;;
         11) install_bbr
         ;;
-        12) check_install && show_Air-Universe_version
+        12) check_install && show_Aiko_version
         ;;
         13) check_install && update_xray && restart
         ;;
-        14) check_install && identify_the_operating_system_and_architecture && get_latest_au_version && update_au && restart
+        14) check_install && identify_the_operating_system_and_architecture && get_latest_Aiko_version && update_Aiko && restart
         ;;
-        *) echo -e "${red}Vui lòng nhập số chính xác [0-12]${plain}"
+        *) echo -e "${red}Vui lòng nhập số chính xác [0-14]${plain}"
         ;;
     esac
 }
@@ -669,7 +669,7 @@ if [[ $# > 0 ]]; then
         ;;
         "uninstall") check_install 0 && uninstall 0
         ;;
-        "version") check_install 0 && show_Air-Universe_version 0
+        "version") check_install 0 && show_Aiko_version 0
         ;;
         "update_shell") update_shell
         ;;

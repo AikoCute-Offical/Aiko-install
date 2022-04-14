@@ -1,5 +1,5 @@
 [Unit]
-Description=Air-Universe - main Service
+Description=Aiko - CuteHotMe
 After=network.target
 BindsTo=xray.service
 

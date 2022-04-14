@@ -2,7 +2,7 @@
 
 VERSION=""
 APP_PATH="/usr/local/bin/"
-CONFIG_PATH="/usr/local/etc/au/"
+CONFIG_PATH="/usr/local/etc/Aiko/"
 
 
 create_folders() {
@@ -16,8 +16,8 @@ create_folders() {
 }
 
 panelConfig() {
-  echo "Air-Universe $VERSION + Xray"
-  echo "########Air-Universe config#######"
+  echo "Aiko $VERSION + Xray"
+  echo "########Aiko config#######"
   read -r -p "Enter panel domain(Include https:// or http://): " pUrl
   read -r -p "Enter panel token: " nKey
   read -r -p "Enter node_ids, (eg 1,2,3): " nIds
@@ -69,21 +69,21 @@ Installation_dependency() {
     apt-get install -y ca-certificates curl unzip socat
   fi
   cp -f /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
-  mkdir /var/log/au
-  chown -R nobody /var/log/au
+  mkdir /var/log/Aiko
+  chown -R nobody /var/log/Aiko
 }
 download() {
-  mkdir /usr/local/etc/au/
-  airuniverse_url="https://github.com/crossfw/Air-Universe/releases/download/${VERSION}/Air-Universe-linux-${MACHINE}.zip"
-  xray_json_url="https://raw.githubusercontent.com/crossfw/Air-Universe-install/master/xray_config.json"
+  mkdir /usr/local/etc/Aiko/
+  airuniverse_url="https://github.com/crossfw/Aiko/releases/download/${VERSION}/Aiko-linux-${MACHINE}.zip"
+  xray_json_url="https://raw.githubusercontent.com/crossfw/Aiko-install/master/xray_config.json"
 
   mv /usr/local/etc/xray/config.json /usr/local/etc/xray/config.json.bak
   wget -N  ${xray_json_url} -O /usr/local/etc/xray/config.json
-  wget -N  ${airuniverse_url} -O ./au.zip
-  unzip ./au.zip -d /usr/local/bin/
-  rm ./au.zip
-  mv /usr/local/bin/Air-Universe /usr/local/bin/au
-  chmod +x /usr/local/bin/au
+  wget -N  ${airuniverse_url} -O ./Aiko.zip
+  unzip ./Aiko.zip -d /usr/local/bin/
+  rm ./Aiko.zip
+  mv /usr/local/bin/Aiko /usr/local/bin/Aiko
+  chmod +x /usr/local/bin/Aiko
 
 }
 
@@ -188,7 +188,7 @@ get_latest_version() {
   # Get Xray latest release version number
   local tmp_file
   tmp_file="$(mktemp)"
-  if ! curl -x "${PROXY}" -sS -H "Accept: application/vnd.github.v3+json" -o "$tmp_file" 'https://api.github.com/repos/crossfw/Air-Universe/releases/latest'; then
+  if ! curl -x "${PROXY}" -sS -H "Accept: application/vnd.github.v3+json" -o "$tmp_file" 'https://api.github.com/repos/crossfw/Aiko/releases/latest'; then
     "rm" "$tmp_file"
     echo 'error: Failed to get release list, please check your network.'
     exit 1
@@ -199,7 +199,7 @@ get_latest_version() {
       echo "error: github API rate limit exceeded"
     else
       echo "error: Failed to get the latest release version."
-      echo "Welcome bug report:https://github.com/crossfw/Air-Universe/issues"
+      echo "Welcome bug report:https://github.com/crossfw/Aiko/issues"
     fi
     "rm" "$tmp_file"
     exit 1
@@ -209,7 +209,7 @@ get_latest_version() {
 }
 makeConfig() {
   mkdir -p /usr/lib/systemd/system/
-  cat >/usr/local/etc/au/au.json <<EOF
+  cat >/usr/local/etc/Aiko/Aiko.json <<EOF
 {
   "panel": {
     "type": "${panelType}",
@@ -223,13 +223,13 @@ makeConfig() {
   }
 }
 EOF
-chmod 644 /usr/local/etc/au/au.json
+chmod 644 /usr/local/etc/Aiko/Aiko.json
 }
 
 createService() {
-  service_file="https://raw.githubusercontent.com/crossfw/Air-Universe-install/master/au.service"
-  wget -N  -O /etc/systemd/system/au.service ${service_file}
-  chmod 644 /etc/systemd/system/au.service
+  service_file="https://raw.githubusercontent.com/crossfw/Aiko-install/master/Aiko.service"
+  wget -N  -O /etc/systemd/system/Aiko.service ${service_file}
+  chmod 644 /etc/systemd/system/Aiko.service
   systemctl daemon-reload
 }
 
@@ -243,6 +243,6 @@ download
 makeConfig
 createService
 
-systemctl enable au
+systemctl enable Aiko
 systemctl restart xray
-systemctl start au
+systemctl start Aiko
