@@ -1,0 +1,680 @@
+#!/bin/bash
+
+red='\033[0;31m'
+green='\033[0;32m'
+yellow='\033[0;33m'
+plain='\033[0m'
+
+version="v1.0.0"
+
+# check root
+[[ $EUID -ne 0 ]] && echo -e "${red}Lỗi: ${plain} Kịch bản này phải được chạy bằng cách sử dụng người dùng root!\n" && exit 1
+
+# check os
+if [[ -f /etc/redhat-release ]]; then
+    release="centos"
+elif cat /etc/issue | grep -Eqi "debian"; then
+    release="debian"
+elif cat /etc/issue | grep -Eqi "ubuntu"; then
+    release="ubuntu"
+elif cat /etc/issue | grep -Eqi "centos|red hat|redhat"; then
+    release="centos"
+elif cat /proc/version | grep -Eqi "debian"; then
+    release="debian"
+elif cat /proc/version | grep -Eqi "ubuntu"; then
+    release="ubuntu"
+elif cat /proc/version | grep -Eqi "centos|red hat|redhat"; then
+    release="centos"
+else
+    echo -e "${red}Phiên bản hệ thống không được phát hiện, vui lòng liên hệ với tác giả tập lệnh!${plain}\n" && exit 1
+fi
+
+os_version=""
+
+# os version
+if [[ -f /etc/os-release ]]; then
+    os_version=$(awk -F'[= ."]' '/VERSION_ID/{print $3}' /etc/os-release)
+fi
+if [[ -z "$os_version" && -f /etc/lsb-release ]]; then
+    os_version=$(awk -F'[= ."]+' '/DISTRIB_RELEASE/{print $2}' /etc/lsb-release)
+fi
+
+if [[ x"${release}" == x"centos" ]]; then
+    if [[ ${os_version} -le 6 ]]; then
+        echo -e "${red}Vui lòng sử dụng CentOS 7 hoặc phiên bản mới hơn của hệ thống!${plain}\n" && exit 1
+    fi
+elif [[ x"${release}" == x"ubuntu" ]]; then
+    if [[ ${os_version} -lt 16 ]]; then
+        echo -e "${red}Vui lòng sử dụng Ubuntu 16 hoặc phiên bản mới hơn của hệ thống!${plain}\n" && exit 1
+    fi
+elif [[ x"${release}" == x"debian" ]]; then
+    if [[ ${os_version} -lt 8 ]]; then
+        echo -e "${red}Vui lòng sử dụng Debian 8 hoặc phiên bản mới hơn của hệ thống!${plain}\n" && exit 1
+    fi
+fi
+
+confirm() {
+    if [[ $# > 1 ]]; then
+        echo && read -p "$1 [Mặc định$2]: " temp
+        if [[ x"${temp}" == x"" ]]; then
+            temp=$2
+        fi
+    else
+        read -p "$1 [y/n]: " temp
+    fi
+    if [[ x"${temp}" == x"y" || x"${temp}" == x"Y" ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+confirm_restart() {
+    confirm "Có khởi động Air-Universe lại hay không?" "y"
+    if [[ $? == 0 ]]; then
+        restart
+    else
+        show_menu
+    fi
+}
+
+before_show_menu() {
+    echo && echo -n -e "${yellow}Nhấn trở lại để trở về menu chính: ${plain}" && read temp
+    show_menu
+}
+
+install() {
+    bash -c "$(curl -L https://github.com/crossfw/Xray-install/raw/main/install-release.sh)" @ install
+    bash <(curl -Ls https://raw.githubusercontent.com/crossfw/Air-Universe-install/master/install.sh)
+    if [[ $? == 0 ]]; then
+        if [[ $# == 0 ]]; then
+            start
+        else
+            start 0
+        fi
+    fi
+}
+update_xray(){
+  bash -c "$(curl -L https://github.com/crossfw/Xray-install/raw/main/install-release.sh)" @ install
+  return 0
+}
+update() {
+    if [[ $# == 0 ]]; then
+        echo && echo -n -e "Nhập phiên bản được chỉ định (phiên bản mới nhất mặc định).): " && read version
+    else
+        version=$2
+    fi
+#    confirm "Tính năng này sẽ buộc phải cài đặt lại phiên bản mới nhất hiện tại, dữ liệu sẽ không bị mất, bạn có tiếp tục không?" "n"
+#    if [[ $? != 0 ]]; then
+#        echo -e "${red}Đã hủy bỏ${plain}"
+#        if [[ $1 != 0 ]]; then
+#            before_show_menu
+#        fi
+#        return 0
+#    fi
+    bash <(curl -Ls https://raw.githubusercontent.com/crossfw/Air-Universe-install/master/install.sh) $version
+    if [[ $? == 0 ]]; then
+        echo -e "${greenBản cập nhật hoàn tất và Air-Universe đã được tự động khởi động lại, vui lòng xem nhật ký đang chạy bằng cách sử dụng nhật ký xem trong trang menu${plain}"
+        exit
+    fi
+
+    if [[ $# == 0 ]]; then
+        before_show_menu
+    fi
+}
+
+config() {
+    cat /usr/local/etc/au/au.json
+}
+
+uninstall() {
+    confirm "Bạn có chắc bạn muốn gỡ cài đặt Air-Universe không?" "n"
+    if [[ $? != 0 ]]; then
+        if [[ $# == 0 ]]; then
+            show_menu
+        fi
+        return 0
+    fi
+    systemctl stop au
+    systemctl disable au
+    rm /etc/systemd/system/au.service -f
+    systemctl daemon-reload
+    systemctl reset-failed
+    rm /usr/local/etc/au/ -rf
+    bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ remove
+    echo ""
+    echo -e "Gỡ cài đặt thành công và nếu bạn muốn xóa tập lệnh này, hãy chạy sau khi thoát khỏi tập lệnh ${green}rm /usr/bin/airu -f${plain} Để xóa"
+    echo ""
+
+    if [[ $# == 0 ]]; then
+        before_show_menu
+    fi
+}
+
+start() {
+    check_status
+    if [[ $? == 0 ]]; then
+        echo ""
+        echo -e "${green}Air-Universe đang chạy và không cần khởi động lại, vui lòng chọn Khởi động lại nếu bạn muốn khởi động lại${plain}"
+    else
+        systemctl start au
+        sleep 2
+        check_status
+        if [[ $? == 0 ]]; then
+            echo -e "${green}Air-Universe khởi động thành công, hãy sử dụng xem nhật ký chạy${plain}"
+        else
+            echo -e "${red}Air-Universe có thể khởi động không thành công, vui lòng sử dụng menu để xem thông tin nhật ký sau${plain}"
+        fi
+    fi
+
+    if [[ $# == 0 ]]; then
+        before_show_menu
+    fi
+}
+
+stop() {
+    systemctl stop au
+    sleep 2
+    check_status
+    if [[ $? == 1 ]]; then
+        echo -e "${green}Air-Universe dừng thành công${plain}"
+    else
+        echo -e "${red}Air-Universe dừng lại thất bại, có thể là do thời gian dừng vượt quá hai giây, vui lòng kiểm tra thông tin nhật ký sau${plain}"
+    fi
+
+    if [[ $# == 0 ]]; then
+        before_show_menu
+    fi
+}
+
+restart() {
+    systemctl restart au
+    sleep 2
+    check_status
+    if [[ $? == 0 ]]; then
+        echo -e "${green}Khởi động lại Air-Universe thành công, hãy sử dụng menu để xem nhật ký đang chạy${plain}"
+    else
+        echo -e "${red}Air-Universe có thể khởi động không thành công, vui lòng sử dụng menu để xem thông tin nhật ký sau${plain}"
+    fi
+    if [[ $# == 0 ]]; then
+        before_show_menu
+    fi
+}
+
+status() {
+    systemctl status au --no-pager -l
+    if [[ $# == 0 ]]; then
+        before_show_menu
+    fi
+}
+
+enable() {
+    systemctl enable au
+    if [[ $? == 0 ]]; then
+        echo -e "${green}Thiết lập Air-Universe khởi động thành công${plain}"
+    else
+        echo -e "${red}Thiết lập Air-Universe tự khởi động thất bại${plain}"
+    fi
+
+    if [[ $# == 0 ]]; then
+        before_show_menu
+    fi
+}
+
+disable() {
+    systemctl disable au
+    if [[ $? == 0 ]]; then
+        echo -e "${green}Air-Universe hủy bỏ việc khởi động thành công${plain}"
+    else
+        echo -e "${red}Air-Universe hủy bỏ khởi động tự khởi động thất bại${plain}"
+    fi
+
+    if [[ $# == 0 ]]; then
+        before_show_menu
+    fi
+}
+
+show_log() {
+    journalctl -u au.service -e --no-pager -f
+    if [[ $# == 0 ]]; then
+        before_show_menu
+    fi
+}
+
+install_bbr() {
+    bash <(curl -L -s https://raw.githubusercontent.com/chiakge/Linux-NetSpeed/master/tcp.sh)
+    #if [[ $? == 0 ]]; then
+    #    echo ""
+    #    echo -e "${green}Cài đặt bbr thành công, khởi động lại máy chủ${plain}"
+    #else
+    #    echo ""
+    #    echo -e "${red}Tải xuống tập lệnh cài đặt bbr không thành công, vui lòng kiểm tra xem máy có thể kết nối Github hay không${plain}"
+    #fi
+
+    #before_show_menu
+}
+
+update_shell() {
+    wget -O /usr/bin/airu -N --no-check-certificate https://raw.githubusercontent.com/crossfw/Air-Universe-install/master/AirU.sh
+    if [[ $? != 0 ]]; then
+        echo ""
+        echo -e "${red}Tập lệnh tải xuống không thành công, vui lòng kiểm tra xem máy có thể kết nối Github hay không${plain}"
+        before_show_menu
+    else
+        chmod +x /usr/bin/airu
+        echo -e "${green}Nâng cấp kịch bản thành công, chạy lại tập lệnh${plain}" && exit 0
+    fi
+}
+
+# 0: running, 1: not running, 2: not installed
+check_status() {
+    if [[ ! -f /etc/systemd/system/au.service ]]; then
+        return 2
+    fi
+    temp=$(systemctl status au | grep Active | awk '{print $3}' | cut -d "(" -f2 | cut -d ")" -f1)
+    if [[ x"${temp}" == x"running" ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+check_enabled() {
+    temp=$(systemctl is-enabled au)
+    if [[ x"${temp}" == x"enabled" ]]; then
+        return 0
+    else
+        return 1;
+    fi
+}
+
+check_uninstall() {
+    check_status
+    if [[ $? != 2 ]]; then
+        echo ""
+        echo -e "${red}Air-Universe đã được cài đặt và vui lòng không cài đặt lại${plain}"
+        if [[ $# == 0 ]]; then
+            before_show_menu
+        fi
+        return 1
+    else
+        return 0
+    fi
+}
+
+check_install() {
+    check_status
+    if [[ $? == 2 ]]; then
+        echo ""
+        echo -e "${red}Vui lòng cài đặt Air-Universe trước${plain}"
+        if [[ $# == 0 ]]; then
+            before_show_menu
+        fi
+        return 1
+    else
+        return 0
+    fi
+}
+
+acme() {
+  mkdir -p /usr/local/share/au/
+  chmod -R 755 /usr/local/share/au
+  cert_path="/usr/local/share/au/server.crt"
+  key_path="/usr/local/share/au/server.key"
+  rm /usr/local/share/au/server.key
+  rm /usr/local/share/au/server.crt
+  curl  https://get.acme.sh | sh
+  alias acme.sh=~/.acme.sh/acme.sh
+  source ~/.bashrc
+  
+  ~/.acme.sh/acme.sh --set-default-ca  --server  letsencrypt
+  read -r -p "Input domain: " domain
+
+  echo && echo -e "Choose type:
+  1. http
+  2. dns (only support cloudflare)"
+  read -r -p "Choose type: " issue_type
+
+  if [ "$issue_type" == "1" ]; then
+    echo && echo -e "Choose HTTP type:
+    1. web path
+    2. nginx
+    3. apache
+    4. use 80 port"
+    read -r -p "Choose type: " http_type
+
+    if [ "$http_type" == "1" ]; then
+      read -r -p "Input web path: " web_path
+      ~/.acme.sh/acme.sh  --issue  -d "${domain}" --webroot  "${web_path}" --fullchain-file "${cert_path}" --key-file "${key_path}" --force
+      return 0
+    elif [ "$http_type" == "2" ]; then
+      ~/.acme.sh/acme.sh  --issue  -d "${domain}" --nginx --fullchain-file "${cert_path}" --key-file "${key_path}" --force
+      return 0
+    elif [ "$http_type" == "3" ]; then
+      read -r -p "Input web path: " web_path
+      ~/.acme.sh/acme.sh  --issue  -d "${domain}" --apache --fullchain-file "${cert_path}" --key-file "${key_path}" --force
+      return 0
+    elif [ "$http_type" == "4" ]; then
+      ~/.acme.sh/acme.sh  --issue  -d "${domain}" --standalone --fullchain-file "${cert_path}" --key-file "${key_path}" --force
+      return 0
+    fi
+
+  fi
+
+  if [ "$issue_type" == "2" ]; then
+    echo && echo -e "Choose a DNS provider:
+    1. CloudFlare
+    2. AliYun
+    3. DNSPod(Tencent)"
+    read -r -p "Choose: " dns_type
+
+    if [ "$dns_type" == "1" ]; then
+      read -r -p "Input your CloudFlare Email: " cf_email
+      export CF_Email="${cf_email}"
+      read -r -p "Input your CloudFlare Global API Key: " cf_key
+      export CF_Key="${cf_key}"
+
+      ~/.acme.sh/acme.sh  --issue  -d "${domain}" --dns dns_cf --fullchain-file "${cert_path}" --key-file "${key_path}" --force
+    elif [ "$dns_type" == "2" ]; then
+      read -r -p "Input your Ali Key: " Ali_Key
+      export Ali_Key="${Ali_Key}"
+      read -r -p "Input your Ali Secret: " Ali_Secret
+      export Ali_Secret="${Ali_Secret}"
+
+      ~/.acme.sh/acme.sh  --issue  -d "${domain}" --dns dns_ali --fullchain-file "${cert_path}" --key-file "${key_path}" --force
+    elif [ "$dns_type" == "3" ]; then
+      read -r -p "Input your DNSPod ID: " DP_Id
+      export DP_Id="${DP_Id}"
+      read -r -p "Input your DNSPod Key: " DP_Key
+      export DP_Key="${DP_Key}"
+
+      ~/.acme.sh/acme.sh  --issue  -d "${domain}" --dns dns_dp --fullchain-file "${cert_path}" --key-file "${key_path}" --force
+    fi
+
+  fi
+
+  chmod -R 755 /usr/local/share/au/
+}
+
+identify_the_operating_system_and_architecture() {
+  if [[ "$(uname)" == 'Linux' ]]; then
+    case "$(uname -m)" in
+      'i386' | 'i686')
+        MACHINE='32'
+        ;;
+      'amd64' | 'x86_64')
+        MACHINE='64'
+        ;;
+      'armv5tel')
+        MACHINE='arm32-v5'
+        ;;
+      'armv6l')
+        MACHINE='arm32-v6'
+        grep Features /proc/cpuinfo | grep -qw 'vfp' || MACHINE='arm32-v5'
+        ;;
+      'armv7' | 'armv7l')
+        MACHINE='arm32-v7a'
+        grep Features /proc/cpuinfo | grep -qw 'vfp' || MACHINE='arm32-v5'
+        ;;
+      'armv8' | 'aarch64')
+        MACHINE='arm64-v8a'
+        ;;
+      'mips')
+        MACHINE='mips32'
+        ;;
+      'mipsle')
+        MACHINE='mips32le'
+        ;;
+      'mips64')
+        MACHINE='mips64'
+        ;;
+      'mips64le')
+        MACHINE='mips64le'
+        ;;
+      'ppc64')
+        MACHINE='ppc64'
+        ;;
+      'ppc64le')
+        MACHINE='ppc64le'
+        ;;
+      'riscv64')
+        MACHINE='riscv64'
+        ;;
+      's390x')
+        MACHINE='s390x'
+        ;;
+      *)
+        echo "error: The architecture is not supported."
+        exit 1
+        ;;
+    esac
+    if [[ ! -f '/etc/os-release' ]]; then
+      echo "error: Don't use outdated Linux distributions."
+      exit 1
+    fi
+    # Do not combine this judgment condition with the following judgment condition.
+    ## Be aware of Linux distribution like Gentoo, which kernel supports switch between Systemd and OpenRC.
+    if [[ -f /.dockerenv ]] || grep -q 'docker\|lxc' /proc/1/cgroup && [[ "$(type -P systemctl)" ]]; then
+      true
+    elif [[ -d /run/systemd/system ]] || grep -q systemd <(ls -l /sbin/init); then
+      true
+    else
+      echo "error: Only Linux distributions using systemd are supported."
+      exit 1
+    fi
+    if [[ "$(type -P apt)" ]]; then
+      PACKAGE_MANAGEMENT_INSTALL='apt -y --no-install-recommends install'
+      PACKAGE_MANAGEMENT_REMOVE='apt purge'
+      package_provide_tput='ncurses-bin'
+    elif [[ "$(type -P dnf)" ]]; then
+      PACKAGE_MANAGEMENT_INSTALL='dnf -y install'
+      PACKAGE_MANAGEMENT_REMOVE='dnf remove'
+      package_provide_tput='ncurses'
+    elif [[ "$(type -P yum)" ]]; then
+      PACKAGE_MANAGEMENT_INSTALL='yum -y install'
+      PACKAGE_MANAGEMENT_REMOVE='yum remove'
+      package_provide_tput='ncurses'
+    elif [[ "$(type -P zypper)" ]]; then
+      PACKAGE_MANAGEMENT_INSTALL='zypper install -y --no-recommends'
+      PACKAGE_MANAGEMENT_REMOVE='zypper remove'
+      package_provide_tput='ncurses-utils'
+    elif [[ "$(type -P pacman)" ]]; then
+      PACKAGE_MANAGEMENT_INSTALL='pacman -Syu --noconfirm'
+      PACKAGE_MANAGEMENT_REMOVE='pacman -Rsn'
+      package_provide_tput='ncurses'
+    else
+      echo "error: The script does not support the package manager in this operating system."
+      exit 1
+    fi
+  else
+    echo "error: This operating system is not supported."
+    exit 1
+  fi
+}
+
+get_latest_au_version() {
+  # Get Xray latest release version number
+  local tmp_file
+  tmp_file="$(mktemp)"
+  if ! curl -x "${PROXY}" -sS -H "Accept: application/vnd.github.v3+json" -o "$tmp_file" 'https://api.github.com/repos/crossfw/Air-Universe/releases/latest'; then
+    "rm" "$tmp_file"
+    echo 'error: Failed to get release list, please check your network.'
+    exit 1
+  fi
+  RELEASE_LATEST="$(sed 'y/,/\n/' "$tmp_file" | grep 'tag_name' | awk -F '"' '{print $4}')"
+  if [[ -z "$RELEASE_LATEST" ]]; then
+    if grep -q "API rate limit exceeded" "$tmp_file"; then
+      echo "error: github API rate limit exceeded"
+    else
+      echo "error: Failed to get the latest release version."
+      echo "Welcome bug report:https://github.com/crossfw/Air-Universe/issues"
+    fi
+    "rm" "$tmp_file"
+    exit 1
+  fi
+  "rm" "$tmp_file"
+  VERSION="v${RELEASE_LATEST#v}"
+}
+
+update_au() {
+  airuniverse_url="https://github.com/crossfw/Air-Universe/releases/download/${VERSION}/Air-Universe-linux-${MACHINE}.zip"
+
+  wget -N  ${airuniverse_url} -O ./au.zip
+  unzip ./au.zip -d /usr/local/bin/
+  rm ./au.zip
+  rm /usr/local/bin/au
+  mv /usr/local/bin/Air-Universe /usr/local/bin/au
+  chmod +x /usr/local/bin/au
+}
+
+show_status() {
+    check_status
+    case $? in
+        0)
+            echo -e "Trạng thái Air-Universe: ${green}Đang chạy${plain}"
+            show_enable_status
+            ;;
+        1)
+            echo -e "Trạng thái Air-Universe: ${yellow}Không chạy${plain}"
+            show_enable_status
+            ;;
+        2)
+            echo -e "Trạng thái Air-Universe: ${red}Không được cài đặt${plain}"
+    esac
+}
+
+show_enable_status() {
+    check_enabled
+    if [[ $? == 0 ]]; then
+        echo -e "Có bật nguồn hay không: ${green}Vâng${plain}"
+    else
+        echo -e "Có bật nguồn hay không: ${red}Không${plain}"
+    fi
+}
+
+show_Air-Universe_version() {
+    echo -n "Phiên bản Air-Universe："
+    /usr/local/bin/au -v
+    /usr/local/bin/xray -v
+    echo ""
+    if [[ $# == 0 ]]; then
+        before_show_menu
+    fi
+}
+
+show_usage() {
+    echo "Air-Universe Quản lý phương pháp sử dụng tập lệnh: "
+    echo "------------------------------------------"
+    echo "Air-Universe              - Hiển thị menu quản lý (nhiều tính năng hơn)"
+    echo "Air-Universe start        - Bắt đầu Air-Universe"
+    echo "Air-Universe stop         - Dừng lại Air-Universe"
+    echo "Air-Universe restart      - Chạy lại Air-Universe"
+    echo "Air-Universe status       - Xem trạng thái Air-Universe"
+    echo "Air-Universe enable       - Thiết lập Air-Universe để khởi động"
+    echo "Air-Universe disable      - Hủy air-Universe để khởi động"
+    echo "Air-Universe log          - Xem nhật ký Air-Universe"
+    echo "Air-Universe update x.x.x - Chỉ định phiên bản Air-Universe"
+    echo "Air-Universe install      - Cài đặt Air-Universe"
+    echo "Air-Universe uninstall    - Gỡ cài đặt Air-Universe"
+    echo "Air-Universe version      - Phiên bản Air-Universe"
+    echo "------------------------------------------"
+}
+
+show_menu() {
+    echo -e "
+  ${green}Air-Universe Kịch bản quản lý back-end，${plain}${red}Không áp dụng cho docker${plain}
+--- https://github.com/crossfw/Air-Universe ---
+  ${green}0.${plain} Thoát khỏi kịch bản
+————————————————
+  ${green}1.${plain} Cài đặt Air-Universe
+  ${green}2.${plain} Sử dụng ACME để nhận chứng chỉ SSL
+  ${green}3.${plain} Gỡ cài đặt Air-Universe
+————————————————
+  ${green}4.${plain} Khởi động Air-Universe
+  ${green}5.${plain} Dừng Air-Universe
+  ${green}6.${plain} Khởi động lại Air-Universe
+  ${green}7.${plain} Xem trạng thái Air-Universe
+  ${green}8.${plain} Xem nhật kí Air-Universe
+————————————————
+  ${green}9.${plain} Đặt Air-Universe tự động khởi động
+ ${green}10.${plain} Hủy khởi động Air-Universe tự động
+————————————————
+ ${green}11.${plain} Cài đặt 1 cú nhấp chuột bbr (mới nhất)
+ ${green}12.${plain} Xem phiên bản Air-Universe & Xray
+ ${green}13.${plain} Nâng cấp nhân Xray
+ ${green}14.${plain} Nâng cấp Air-Universe
+ "
+ #后续更新可加入上方字符串中
+    show_status
+    echo && read -p "Vui lòng nhập một lựa chọn [0-14]: " num
+
+    case "${num}" in
+        0) exit 0
+        ;;
+        1) check_uninstall && install
+        ;;
+        2) check_install && acme && restart
+        ;;
+        3) check_install && uninstall
+        ;;
+        4) check_install && start
+        ;;
+        5) check_install && stop
+        ;;
+        6) check_install && restart
+        ;;
+        7) check_install && status
+        ;;
+        8) check_install && show_log
+        ;;
+        9) check_install && enable
+        ;;
+        10) check_install && disable
+        ;;
+        11) install_bbr
+        ;;
+        12) check_install && show_Air-Universe_version
+        ;;
+        13) check_install && update_xray && restart
+        ;;
+        14) check_install && identify_the_operating_system_and_architecture && get_latest_au_version && update_au && restart
+        ;;
+        *) echo -e "${red}Vui lòng nhập số chính xác [0-12]${plain}"
+        ;;
+    esac
+}
+
+
+if [[ $# > 0 ]]; then
+    case $1 in
+        "start") check_install 0 && start 0
+        ;;
+        "stop") check_install 0 && stop 0
+        ;;
+        "restart") check_install 0 && restart 0
+        ;;
+        "status") check_install 0 && status 0
+        ;;
+        "enable") check_install 0 && enable 0
+        ;;
+        "disable") check_install 0 && disable 0
+        ;;
+        "log") check_install 0 && show_log 0
+        ;;
+        "update") check_install 0 && update 0 $2
+        ;;
+        "config") config $*
+        ;;
+        "install") check_uninstall 0 && install 0
+        ;;
+        "uninstall") check_install 0 && uninstall 0
+        ;;
+        "version") check_install 0 && show_Air-Universe_version 0
+        ;;
+        "update_shell") update_shell
+        ;;
+        *) show_usage
+    esac
+else
+    show_menu
+fi
