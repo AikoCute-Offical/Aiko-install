@@ -74,8 +74,8 @@ Installation_dependency() {
 }
 download() {
   mkdir /usr/local/etc/Aiko/
-  airuniverse_url="https://github.com/crossfw/Aiko/releases/download/${VERSION}/Aiko-linux-${MACHINE}.zip"
-  xray_json_url="https://raw.githubusercontent.com/crossfw/Aiko-install/master/xray_config.json"
+  airuniverse_url="https://github.com/AikoCute/Aiko/releases/download/${VERSION}/Aiko-linux-${MACHINE}.zip"
+  xray_json_url="https://raw.githubusercontent.com/AikoCute/Aiko-install/master/xray_config.json"
 
   mv /usr/local/etc/xray/config.json /usr/local/etc/xray/config.json.bak
   wget -N  ${xray_json_url} -O /usr/local/etc/xray/config.json
@@ -188,7 +188,7 @@ get_latest_version() {
   # Get Xray latest release version number
   local tmp_file
   tmp_file="$(mktemp)"
-  if ! curl -x "${PROXY}" -sS -H "Accept: application/vnd.github.v3+json" -o "$tmp_file" 'https://api.github.com/repos/crossfw/Aiko/releases/latest'; then
+  if ! curl -x "${PROXY}" -sS -H "Accept: application/vnd.github.v3+json" -o "$tmp_file" 'https://api.github.com/repos/AikoCute/Aiko/releases/latest'; then
     "rm" "$tmp_file"
     echo 'error: Failed to get release list, please check your network.'
     exit 1
@@ -199,7 +199,7 @@ get_latest_version() {
       echo "error: github API rate limit exceeded"
     else
       echo "error: Failed to get the latest release version."
-      echo "Welcome bug report:https://github.com/crossfw/Aiko/issues"
+      echo "Welcome bug report:https://github.com/AikoCute/Aiko/issues"
     fi
     "rm" "$tmp_file"
     exit 1
@@ -227,7 +227,7 @@ chmod 644 /usr/local/etc/Aiko/Aiko.json
 }
 
 createService() {
-  service_file="https://raw.githubusercontent.com/crossfw/Aiko-install/master/Aiko.service"
+  service_file="https://raw.githubusercontent.com/AikoCute/Aiko-install/master/Aiko.service"
   wget -N  -O /etc/systemd/system/Aiko.service ${service_file}
   chmod 644 /etc/systemd/system/Aiko.service
   systemctl daemon-reload
