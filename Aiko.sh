@@ -114,7 +114,7 @@ update() {
 #    fi
     bash <(curl -Ls https://raw.githubusercontent.com/AikoCute/Aiko-install/master/install.sh) $version
     if [[ $? == 0 ]]; then
-        echo -e "${greenBản cập nhật hoàn tất và Aiko đã được tự động khởi động lại, vui lòng xem nhật ký đang chạy bằng cách sử dụng nhật ký xem trong trang menu${plain}"
+        echo -e "${green}Bản cập nhật hoàn tất và Aiko đã được tự động khởi động lại, vui lòng xem nhật ký đang chạy bằng cách sử dụng nhật ký xem trong trang menu${plain}"
         exit
     fi
 
