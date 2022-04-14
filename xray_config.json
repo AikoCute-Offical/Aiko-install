@@ -1,7 +1,6 @@
 {
-    "services": [
     "log": {
-        "access": "/var/log/au/xr.log"
+        "access": "/var/log/Aiko/Aiko.log"
     },
     "stats": {},
     "api": {
