@@ -2,7 +2,7 @@
 
 VERSION=""
 APP_PATH="/usr/local/bin/"
-CONFIG_PATH="/usr/local/etc/Aiko/"
+CONFIG_PATH="/usr/local/etc/aiko/"
 
 
 create_folders() {
@@ -16,8 +16,8 @@ create_folders() {
 }
 
 panelConfig() {
-  echo "Aiko $VERSION + Xray"
-  echo "########Aiko config#######"
+  echo "aiko $VERSION + Xray"
+  echo "########aiko config#######"
   read -r -p "Enter panel domain(Include https:// or http://): " pUrl
   read -r -p "Enter panel token: " nKey
   read -r -p "Enter node_ids, (eg 1,2,3): " nIds
@@ -69,21 +69,21 @@ Installation_dependency() {
     apt-get install -y ca-certificates curl unzip socat
   fi
   cp -f /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
-  mkdir /var/log/Aiko
-  chown -R nobody /var/log/Aiko
+  mkdir /var/log/aiko
+  chown -R nobody /var/log/aiko
 }
 download() {
-  mkdir /usr/local/etc/Aiko/
-  Aiko_url="https://github.com/AikoCute/Aiko/releases/download/${VERSION}/Aiko-linux-${MACHINE}.zip"
+  mkdir /usr/local/etc/aiko/
+  aiko_url="https://github.com/AikoCute/Aiko/releases/download/${VERSION}/aiko-linux-${MACHINE}.zip"
   xray_json_url="https://raw.githubusercontent.com/AikoCute/Aiko-install/master/xray_config.json"
 
   mv /usr/local/etc/xray/config.json /usr/local/etc/xray/config.json.bak
   wget -N  ${xray_json_url} -O /usr/local/etc/xray/config.json
-  wget -N  ${Aiko_url} -O ./Aiko.zip
-  unzip ./Aiko.zip -d /usr/local/bin/
-  rm ./Aiko.zip
-  mv /usr/local/bin/Aiko /usr/local/bin/Aiko
-  chmod +x /usr/local/bin/Aiko
+  wget -N  ${aiko_url} -O ./aiko.zip
+  unzip ./aiko.zip -d /usr/local/bin/
+  rm ./aiko.zip
+  mv /usr/local/bin/aiko /usr/local/bin/aiko
+  chmod +x /usr/local/bin/aiko
 
 }
 
@@ -209,7 +209,7 @@ get_latest_version() {
 }
 makeConfig() {
   mkdir -p /usr/lib/systemd/system/
-  cat >/usr/local/etc/Aiko/Aiko.json <<EOF
+  cat >/usr/local/etc/aiko/aiko.json <<EOF
 {
   "panel": {
     "type": "${panelType}",
@@ -223,13 +223,13 @@ makeConfig() {
   }
 }
 EOF
-chmod 644 /usr/local/etc/Aiko/Aiko.json
+chmod 644 /usr/local/etc/aiko/aiko.json
 }
 
 createService() {
-  service_file="https://raw.githubusercontent.com/AikoCute/Aiko-install/master/Aiko.service"
-  wget -N  -O /etc/systemd/system/Aiko.service ${service_file}
-  chmod 644 /etc/systemd/system/Aiko.service
+  service_file="https://raw.githubusercontent.com/AikoCute/Aiko-install/master/aiko.service"
+  wget -N  -O /etc/systemd/system/aiko.service ${service_file}
+  chmod 644 /etc/systemd/system/aiko.service
   systemctl daemon-reload
 }
 
@@ -243,6 +243,6 @@ download
 makeConfig
 createService
 
-systemctl enable Aiko
+systemctl enable aiko
 systemctl restart xray
-systemctl start Aiko
+systemctl start aiko
