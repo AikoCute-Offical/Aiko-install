@@ -209,7 +209,7 @@ get_latest_version() {
 }
 makeConfig() {
   mkdir -p /usr/lib/systemd/system/
-  cat >/usr/local/etc/au/Aiko.json <<EOF
+  cat >/usr/local/etc/au/config.json <<EOF
 {
   "panel": {
     "type": "${panelType}",
@@ -223,7 +223,7 @@ makeConfig() {
   }
 }
 EOF
-chmod 644 /usr/local/etc/au/Aiko.json
+chmod 644 /usr/local/etc/au/config.json
 }
 
 createService() {
