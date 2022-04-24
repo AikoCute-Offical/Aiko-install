@@ -1,6 +1,6 @@
 {
     "log": {
-        "access": "/var/log/Aiko/Aiko.log"
+        "access": "/var/log/au/au.log"
     },
     "stats": {},
     "api": {

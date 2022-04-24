@@ -5,7 +5,7 @@ green='\033[0;32m'
 yellow='\033[0;33m'
 plain='\033[0m'
 
-version="v1.0.0"
+version="v1.0.2"
 
 # check root
 [[ $EUID -ne 0 ]] && echo -e "${red}Lỗi: ${plain} Kịch bản này phải được chạy bằng cách sử dụng người dùng root!\n" && exit 1
@@ -70,7 +70,7 @@ confirm() {
 }
 
 confirm_restart() {
-    confirm "Có khởi động Aiko lại hay không?" "y"
+    confirm "Có khởi động au lại hay không?" "y"
     if [[ $? == 0 ]]; then
         restart
     else
@@ -84,8 +84,8 @@ before_show_menu() {
 }
 
 install() {
-    bash -c "$(curl -L https://github.com/AikoCute/Xray-install/raw/main/install-release.sh)" @ install
-    bash <(curl -Ls https://raw.githubusercontent.com/AikoCute/Aiko-install/master/install.sh)
+    bash -c "$(curl -L https://github.com/auCute/Xray-install/raw/main/install-release.sh)" @ install
+    bash <(curl -Ls https://raw.githubusercontent.com/auCute/au-install/master/install.sh)
     if [[ $? == 0 ]]; then
         if [[ $# == 0 ]]; then
             start
@@ -95,7 +95,7 @@ install() {
     fi
 }
 update_xray(){
-  bash -c "$(curl -L https://github.com/AikoCute/Xray-install/raw/main/install-release.sh)" @ install
+  bash -c "$(curl -L https://github.com/auCute/Xray-install/raw/main/install-release.sh)" @ install
   return 0
 }
 update() {
@@ -112,9 +112,9 @@ update() {
 #        fi
 #        return 0
 #    fi
-    bash <(curl -Ls https://raw.githubusercontent.com/AikoCute/Aiko-install/master/install.sh) $version
+    bash <(curl -Ls https://raw.githubusercontent.com/auCute/au-install/master/install.sh) $version
     if [[ $? == 0 ]]; then
-        echo -e "${green}Bản cập nhật hoàn tất và Aiko đã được tự động khởi động lại, vui lòng xem nhật ký đang chạy bằng cách sử dụng nhật ký xem trong trang menu${plain}"
+        echo -e "${green}Bản cập nhật hoàn tất và au đã được tự động khởi động lại, vui lòng xem nhật ký đang chạy bằng cách sử dụng nhật ký xem trong trang menu${plain}"
         exit
     fi
 
@@ -124,26 +124,26 @@ update() {
 }
 
 config() {
-    cat /usr/local/etc/Aiko/Aiko.json
+    cat /usr/local/etc/au/au.json
 }
 
 uninstall() {
-    confirm "Bạn có chắc bạn muốn gỡ cài đặt Aiko không?" "n"
+    confirm "Bạn có chắc bạn muốn gỡ cài đặt au không?" "n"
     if [[ $? != 0 ]]; then
         if [[ $# == 0 ]]; then
             show_menu
         fi
         return 0
     fi
-    systemctl stop Aiko
-    systemctl disable Aiko
-    rm /etc/systemd/system/Aiko.service -f
+    systemctl stop au
+    systemctl disable au
+    rm /etc/systemd/system/au.service -f
     systemctl daemon-reload
     systemctl reset-failed
-    rm /usr/local/etc/Aiko/ -rf
+    rm /usr/local/etc/au/ -rf
     bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ remove
     echo ""
-    echo -e "Gỡ cài đặt thành công và nếu bạn muốn xóa tập lệnh này, hãy chạy sau khi thoát khỏi tập lệnh ${green}rm /usr/bin/Aiko -f${plain} Để xóa"
+    echo -e "Gỡ cài đặt thành công và nếu bạn muốn xóa tập lệnh này, hãy chạy sau khi thoát khỏi tập lệnh ${green}rm /usr/bin/au -f${plain} Để xóa"
     echo ""
 
     if [[ $# == 0 ]]; then
@@ -155,15 +155,15 @@ start() {
     check_status
     if [[ $? == 0 ]]; then
         echo ""
-        echo -e "${green}Aiko đang chạy và không cần khởi động lại, vui lòng chọn Khởi động lại nếu bạn muốn khởi động lại${plain}"
+        echo -e "${green}au đang chạy và không cần khởi động lại, vui lòng chọn Khởi động lại nếu bạn muốn khởi động lại${plain}"
     else
-        systemctl start Aiko
+        systemctl start au
         sleep 2
         check_status
         if [[ $? == 0 ]]; then
-            echo -e "${green}Aiko khởi động thành công, hãy sử dụng xem nhật ký chạy${plain}"
+            echo -e "${green}au khởi động thành công, hãy sử dụng xem nhật ký chạy${plain}"
         else
-            echo -e "${red}Aiko có thể khởi động không thành công, vui lòng sử dụng menu để xem thông tin nhật ký sau${plain}"
+            echo -e "${red}au có thể khởi động không thành công, vui lòng sử dụng menu để xem thông tin nhật ký sau${plain}"
         fi
     fi
 
@@ -173,13 +173,13 @@ start() {
 }
 
 stop() {
-    systemctl stop Aiko
+    systemctl stop au
     sleep 2
     check_status
     if [[ $? == 1 ]]; then
-        echo -e "${green}Aiko dừng thành công${plain}"
+        echo -e "${green}au dừng thành công${plain}"
     else
-        echo -e "${red}Aiko dừng lại thất bại, có thể là do thời gian dừng vượt quá hai giây, vui lòng kiểm tra thông tin nhật ký sau${plain}"
+        echo -e "${red}au dừng lại thất bại, có thể là do thời gian dừng vượt quá hai giây, vui lòng kiểm tra thông tin nhật ký sau${plain}"
     fi
 
     if [[ $# == 0 ]]; then
@@ -188,13 +188,13 @@ stop() {
 }
 
 restart() {
-    systemctl restart Aiko
+    systemctl restart au
     sleep 2
     check_status
     if [[ $? == 0 ]]; then
-        echo -e "${green}Khởi động lại Aiko thành công, hãy sử dụng menu để xem nhật ký đang chạy${plain}"
+        echo -e "${green}Khởi động lại au thành công, hãy sử dụng menu để xem nhật ký đang chạy${plain}"
     else
-        echo -e "${red}Aiko có thể khởi động không thành công, vui lòng sử dụng menu để xem thông tin nhật ký sau${plain}"
+        echo -e "${red}au có thể khởi động không thành công, vui lòng sử dụng menu để xem thông tin nhật ký sau${plain}"
     fi
     if [[ $# == 0 ]]; then
         before_show_menu
@@ -202,18 +202,18 @@ restart() {
 }
 
 status() {
-    systemctl status Aiko --no-pager -l
+    systemctl status au --no-pager -l
     if [[ $# == 0 ]]; then
         before_show_menu
     fi
 }
 
 enable() {
-    systemctl enable Aiko
+    systemctl enable au
     if [[ $? == 0 ]]; then
-        echo -e "${green}Thiết lập Aiko khởi động thành công${plain}"
+        echo -e "${green}Thiết lập au khởi động thành công${plain}"
     else
-        echo -e "${red}Thiết lập Aiko tự khởi động thất bại${plain}"
+        echo -e "${red}Thiết lập au tự khởi động thất bại${plain}"
     fi
 
     if [[ $# == 0 ]]; then
@@ -222,11 +222,11 @@ enable() {
 }
 
 disable() {
-    systemctl disable Aiko
+    systemctl disable au
     if [[ $? == 0 ]]; then
-        echo -e "${green}Aiko hủy bỏ việc khởi động thành công${plain}"
+        echo -e "${green}au hủy bỏ việc khởi động thành công${plain}"
     else
-        echo -e "${red}Aiko hủy bỏ khởi động tự khởi động thất bại${plain}"
+        echo -e "${red}au hủy bỏ khởi động tự khởi động thất bại${plain}"
     fi
 
     if [[ $# == 0 ]]; then
@@ -235,14 +235,14 @@ disable() {
 }
 
 show_log() {
-    journalctl -u Aiko.service -e --no-pager -f
+    journalctl -u au.service -e --no-pager -f
     if [[ $# == 0 ]]; then
         before_show_menu
     fi
 }
 
 install_bbr() {
-    bash <(curl -L -s https://raw.githubusercontent.com/AikoCute/BBR/Aiko/tcp.sh)
+    bash <(curl -L -s https://raw.githubusercontent.com/auCute/BBR/au/tcp.sh)
     #if [[ $? == 0 ]]; then
     #    echo ""
     #    echo -e "${green}Cài đặt bbr thành công, khởi động lại máy chủ${plain}"
@@ -255,23 +255,23 @@ install_bbr() {
 }
 
 update_shell() {
-    wget -O /usr/bin/Aiko -N --no-check-certificate https://raw.githubusercontent.com/AikoCute/Aiko-install/master/Aiko.sh
+    wget -O /usr/bin/au -N --no-check-certificate https://raw.githubusercontent.com/auCute/au-install/master/au.sh
     if [[ $? != 0 ]]; then
         echo ""
         echo -e "${red}Tập lệnh tải xuống không thành công, vui lòng kiểm tra xem máy có thể kết nối Github hay không${plain}"
         before_show_menu
     else
-        chmod +x /usr/bin/Aiko
+        chmod +x /usr/bin/au
         echo -e "${green}Nâng cấp kịch bản thành công, chạy lại tập lệnh${plain}" && exit 0
     fi
 }
 
 # 0: running, 1: not running, 2: not installed
 check_status() {
-    if [[ ! -f /etc/systemd/system/Aiko.service ]]; then
+    if [[ ! -f /etc/systemd/system/au.service ]]; then
         return 2
     fi
-    temp=$(systemctl status Aiko | grep Active | awk '{print $3}' | cut -d "(" -f2 | cut -d ")" -f1)
+    temp=$(systemctl status au | grep Active | awk '{print $3}' | cut -d "(" -f2 | cut -d ")" -f1)
     if [[ x"${temp}" == x"running" ]]; then
         return 0
     else
@@ -280,7 +280,7 @@ check_status() {
 }
 
 check_enabled() {
-    temp=$(systemctl is-enabled Aiko)
+    temp=$(systemctl is-enabled au)
     if [[ x"${temp}" == x"enabled" ]]; then
         return 0
     else
@@ -292,7 +292,7 @@ check_uninstall() {
     check_status
     if [[ $? != 2 ]]; then
         echo ""
-        echo -e "${red}Aiko đã được cài đặt và vui lòng không cài đặt lại${plain}"
+        echo -e "${red}au đã được cài đặt và vui lòng không cài đặt lại${plain}"
         if [[ $# == 0 ]]; then
             before_show_menu
         fi
@@ -306,7 +306,7 @@ check_install() {
     check_status
     if [[ $? == 2 ]]; then
         echo ""
-        echo -e "${red}Vui lòng cài đặt Aiko trước${plain}"
+        echo -e "${red}Vui lòng cài đặt au trước${plain}"
         if [[ $# == 0 ]]; then
             before_show_menu
         fi
@@ -317,12 +317,12 @@ check_install() {
 }
 
 acme() {
-  mkdir -p /usr/local/share/Aiko/
-  chmod -R 755 /usr/local/share/Aiko
-  cert_path="/usr/local/share/Aiko/server.crt"
-  key_path="/usr/local/share/Aiko/server.key"
-  rm /usr/local/share/Aiko/server.key
-  rm /usr/local/share/Aiko/server.crt
+  mkdir -p /usr/local/share/au/
+  chmod -R 755 /usr/local/share/au
+  cert_path="/usr/local/share/au/server.crt"
+  key_path="/usr/local/share/au/server.key"
+  rm /usr/local/share/au/server.key
+  rm /usr/local/share/au/server.crt
   curl  https://get.acme.sh | sh
   alias acme.sh=~/.acme.sh/acme.sh
   source ~/.bashrc
@@ -393,7 +393,7 @@ acme() {
 
   fi
 
-  chmod -R 755 /usr/local/share/Aiko/
+  chmod -R 755 /usr/local/share/au/
 }
 
 identify_the_operating_system_and_architecture() {
@@ -492,11 +492,11 @@ identify_the_operating_system_and_architecture() {
   fi
 }
 
-get_latest_Aiko_version() {
+get_latest_au_version() {
   # Get Xray latest release version number
   local tmp_file
   tmp_file="$(mktemp)"
-  if ! curl -x "${PROXY}" -sS -H "Accept: application/vnd.github.v3+json" -o "$tmp_file" 'https://api.github.com/repos/AikoCute/Aiko/releases/latest'; then
+  if ! curl -x "${PROXY}" -sS -H "Accept: application/vnd.github.v3+json" -o "$tmp_file" 'https://api.github.com/repos/auCute/au/releases/latest'; then
     "rm" "$tmp_file"
     echo 'error: Failed to get release list, please check your network.'
     exit 1
@@ -507,7 +507,7 @@ get_latest_Aiko_version() {
       echo "error: github API rate limit exceeded"
     else
       echo "error: Failed to get the latest release version."
-      echo "Welcome bug report:https://github.com/AikoCute/Aiko/issues"
+      echo "Welcome bug report:https://github.com/auCute/au/issues"
     fi
     "rm" "$tmp_file"
     exit 1
@@ -516,30 +516,30 @@ get_latest_Aiko_version() {
   VERSION="v${RELEASE_LATEST#v}"
 }
 
-update_Aiko() {
-  Aiko_url="https://github.com/AikoCute/Aiko/releases/download/${VERSION}/Aiko-linux-${MACHINE}.zip"
+update_au() {
+  au_url="https://github.com/auCute/au/releases/download/${VERSION}/au-linux-${MACHINE}.zip"
 
-  wget -N  ${Aiko_url} -O ./Aiko.zip
-  unzip ./Aiko.zip -d /usr/local/bin/
-  rm ./Aiko.zip
-  rm /usr/local/bin/Aiko
-  mv /usr/local/bin/Aiko /usr/local/bin/Aiko
-  chmod +x /usr/local/bin/Aiko
+  wget -N  ${au_url} -O ./au.zip
+  unzip ./au.zip -d /usr/local/bin/
+  rm ./au.zip
+  rm /usr/local/bin/au
+  mv /usr/local/bin/au /usr/local/bin/au
+  chmod +x /usr/local/bin/au
 }
 
 show_status() {
     check_status
     case $? in
         0)
-            echo -e "Trạng thái Aiko: ${green}Đang chạy${plain}"
+            echo -e "Trạng thái au: ${green}Đang chạy${plain}"
             show_enable_status
             ;;
         1)
-            echo -e "Trạng thái Aiko: ${yellow}Không chạy${plain}"
+            echo -e "Trạng thái au: ${yellow}Không chạy${plain}"
             show_enable_status
             ;;
         2)
-            echo -e "Trạng thái Aiko: ${red}Không được cài đặt${plain}"
+            echo -e "Trạng thái au: ${red}Không được cài đặt${plain}"
     esac
 }
 
@@ -552,9 +552,9 @@ show_enable_status() {
     fi
 }
 
-show_Aiko_version() {
-    echo -n "Phiên bản Aiko："
-    /usr/local/bin/Aiko -v
+show_au_version() {
+    echo -n "Phiên bản au："
+    /usr/local/bin/au -v
     /usr/local/bin/xray -v
     echo ""
     if [[ $# == 0 ]]; then
@@ -563,46 +563,46 @@ show_Aiko_version() {
 }
 
 show_usage() {
-    echo "Aiko Quản lý phương pháp sử dụng tập lệnh: "
+    echo "au Quản lý phương pháp sử dụng tập lệnh: "
     echo "------------------------------------------"
-    echo "Aiko              - Hiển thị menu quản lý (nhiều tính năng hơn)"
-    echo "Aiko start        - Bắt đầu Aiko"
-    echo "Aiko stop         - Dừng lại Aiko"
-    echo "Aiko restart      - Chạy lại Aiko"
-    echo "Aiko status       - Xem trạng thái Aiko"
-    echo "Aiko enable       - Thiết lập Aiko để khởi động"
-    echo "Aiko disable      - Hủy Aiko để khởi động"
-    echo "Aiko log          - Xem nhật ký Aiko"
-    echo "Aiko update x.x.x - Chỉ định phiên bản Aiko"
-    echo "Aiko install      - Cài đặt Aiko"
-    echo "Aiko uninstall    - Gỡ cài đặt Aiko"
-    echo "Aiko version      - Phiên bản Aiko"
+    echo "au              - Hiển thị menu quản lý (nhiều tính năng hơn)"
+    echo "au start        - Bắt đầu au"
+    echo "au stop         - Dừng lại au"
+    echo "au restart      - Chạy lại au"
+    echo "au status       - Xem trạng thái au"
+    echo "au enable       - Thiết lập au để khởi động"
+    echo "au disable      - Hủy au để khởi động"
+    echo "au log          - Xem nhật ký au"
+    echo "au update x.x.x - Chỉ định phiên bản au"
+    echo "au install      - Cài đặt au"
+    echo "au uninstall    - Gỡ cài đặt au"
+    echo "au version      - Phiên bản au"
     echo "------------------------------------------"
 }
 
 show_menu() {
     echo -e "
-  ${green}Aiko Kịch bản quản lý back-end，${plain}${red}Không áp dụng cho docker${plain}
---- https://github.com/AikoCute/Aiko ---
+  ${green}au Kịch bản quản lý back-end，${plain}${red}Không áp dụng cho docker${plain}
+--- https://github.com/auCute/au ---
   ${green}0.${plain} Thoát khỏi kịch bản
 ————————————————
-  ${green}1.${plain} Cài đặt Aiko
+  ${green}1.${plain} Cài đặt au
   ${green}2.${plain} Sử dụng ACME để nhận chứng chỉ SSL
-  ${green}3.${plain} Gỡ cài đặt Aiko
+  ${green}3.${plain} Gỡ cài đặt au
 ————————————————
-  ${green}4.${plain} Khởi động Aiko
-  ${green}5.${plain} Dừng Aiko
-  ${green}6.${plain} Khởi động lại Aiko
-  ${green}7.${plain} Xem trạng thái Aiko
-  ${green}8.${plain} Xem nhật kí Aiko
+  ${green}4.${plain} Khởi động au
+  ${green}5.${plain} Dừng au
+  ${green}6.${plain} Khởi động lại au
+  ${green}7.${plain} Xem trạng thái au
+  ${green}8.${plain} Xem nhật kí au
 ————————————————
-  ${green}9.${plain} Đặt Aiko tự động khởi động
- ${green}10.${plain} Hủy khởi động Aiko tự động
+  ${green}9.${plain} Đặt au tự động khởi động
+ ${green}10.${plain} Hủy khởi động au tự động
 ————————————————
  ${green}11.${plain} Cài đặt 1 cú nhấp chuột bbr (mới nhất)
- ${green}12.${plain} Xem phiên bản Aiko & Xray
+ ${green}12.${plain} Xem phiên bản au & Xray
  ${green}13.${plain} Nâng cấp nhân Xray
- ${green}14.${plain} Nâng cấp Aiko
+ ${green}14.${plain} Nâng cấp au
  "
  # Cập nhật tiếp theo có thể được thêm vào chuỗi trên
     show_status
@@ -633,11 +633,11 @@ show_menu() {
         ;;
         11) install_bbr
         ;;
-        12) check_install && show_Aiko_version
+        12) check_install && show_au_version
         ;;
         13) check_install && update_xray && restart
         ;;
-        14) check_install && identify_the_operating_system_and_architecture && get_latest_Aiko_version && update_Aiko && restart
+        14) check_install && identify_the_operating_system_and_architecture && get_latest_au_version && update_au && restart
         ;;
         *) echo -e "${red}Vui lòng nhập số chính xác [0-14]${plain}"
         ;;
@@ -669,7 +669,7 @@ if [[ $# > 0 ]]; then
         ;;
         "uninstall") check_install 0 && uninstall 0
         ;;
-        "version") check_install 0 && show_Aiko_version 0
+        "version") check_install 0 && show_au_version 0
         ;;
         "update_shell") update_shell
         ;;
