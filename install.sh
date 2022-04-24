@@ -68,7 +68,7 @@ Installation_dependency() {
     apt-get update -y
     apt-get install -y ca-certificates curl unzip socat
   fi
-  cp -f /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+  cp -f /usr/share/zoneinfo/Asia/Ho_Chi_Minh /etc/localtime
   mkdir /var/log/au
   chown -R nobody /var/log/au
 }
