@@ -16,8 +16,8 @@ create_folders() {
 }
 
 panelConfig() {
-  echo "au $VERSION + Xray"
-  echo "########au config#######"
+  echo "Aiko $VERSION + Xray"
+  echo "########Aiko config#######"
   read -r -p "Enter panel domain(Include https:// or http://): " pUrl
   read -r -p "Enter panel token: " nKey
   read -r -p "Enter node_ids, (eg 1,2,3): " nIds
@@ -74,15 +74,15 @@ Installation_dependency() {
 }
 download() {
   mkdir /usr/local/etc/au/
-  au_url="https://github.com/auCute/au/releases/download/${VERSION}/au-linux-${MACHINE}.zip"
-  xray_json_url="https://raw.githubusercontent.com/auCute/au-install/master/xray_config.json"
+  airuniverse_url="https://github.com/AikoCute/Aiko/releases/download/${VERSION}/Aiko-linux-${MACHINE}.zip"
+  xray_json_url="https://raw.githubusercontent.com/AikoCute/Aiko-install/master/xray_config.json"
 
   mv /usr/local/etc/xray/config.json /usr/local/etc/xray/config.json.bak
   wget -N  ${xray_json_url} -O /usr/local/etc/xray/config.json
-  wget -N  ${au_url} -O ./au.zip
+  wget -N  ${airuniverse_url} -O ./au.zip
   unzip ./au.zip -d /usr/local/bin/
   rm ./au.zip
-  mv /usr/local/bin/au /usr/local/bin/au
+  mv /usr/local/bin/Aiko /usr/local/bin/au
   chmod +x /usr/local/bin/au
 
 }
@@ -188,7 +188,7 @@ get_latest_version() {
   # Get Xray latest release version number
   local tmp_file
   tmp_file="$(mktemp)"
-  if ! curl -x "${PROXY}" -sS -H "Accept: application/vnd.github.v3+json" -o "$tmp_file" 'https://api.github.com/repos/auCute/au/releases/latest'; then
+  if ! curl -x "${PROXY}" -sS -H "Accept: application/vnd.github.v3+json" -o "$tmp_file" 'https://api.github.com/repos/AikoCute/Aiko/releases/latest'; then
     "rm" "$tmp_file"
     echo 'error: Failed to get release list, please check your network.'
     exit 1
@@ -199,7 +199,7 @@ get_latest_version() {
       echo "error: github API rate limit exceeded"
     else
       echo "error: Failed to get the latest release version."
-      echo "Welcome bug report:https://github.com/auCute/au/issues"
+      echo "Welcome bug report:https://github.com/AikoCute/Aiko/issues"
     fi
     "rm" "$tmp_file"
     exit 1
@@ -209,7 +209,7 @@ get_latest_version() {
 }
 makeConfig() {
   mkdir -p /usr/lib/systemd/system/
-  cat >/usr/local/etc/au/au.json <<EOF
+  cat >/usr/local/etc/au/Aiko.json <<EOF
 {
   "panel": {
     "type": "${panelType}",
@@ -223,11 +223,11 @@ makeConfig() {
   }
 }
 EOF
-chmod 644 /usr/local/etc/au/au.json
+chmod 644 /usr/local/etc/au/Aiko.json
 }
 
 createService() {
-  service_file="https://raw.githubusercontent.com/auCute/au-install/master/au.service"
+  service_file="https://raw.githubusercontent.com/AikoCute/Aiko-install/master/au.service"
   wget -N  -O /etc/systemd/system/au.service ${service_file}
   chmod 644 /etc/systemd/system/au.service
   systemctl daemon-reload
