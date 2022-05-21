@@ -110,6 +110,14 @@ pre_install_docker_compose() {
   echo "-------------------------------"
   echo -e "Node_ID: ${node_id}"
   echo "-------------------------------"
+
+# giới hạn thiết bị
+  read -p " Giới hạn thiết bị (Limit):" limit
+  [ -z "${limit}" ] && limit=0
+  echo "-------------------------------"
+  echo -e "Limit: ${limit}"
+  echo "-------------------------------"
+
 }
  
 
@@ -200,6 +208,7 @@ Nodes:
           CLOUDFLARE_API_KEY: bbb
 EOF
   sed -i "s|NodeID:.*|NodeID: ${node_id}|" ./config.yml
+  sed -i "s|DeviceLimit:.*|DeviceLimit: ${limit}|" ./config.yml
 }
 
 # Install docker and docker compose
