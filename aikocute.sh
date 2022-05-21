@@ -111,6 +111,13 @@ pre_install_docker_compose() {
   echo -e "Node_ID: ${node_id}"
   echo "-------------------------------"
 
+# giới hạn tốc độ
+  read -p " Giới hạn tốc độ (Mbps):" limit_speed
+  [ -z "${limit_speed}" ] && limit_speed=0
+  echo "-------------------------------"
+  echo -e "Giới hạn tốc độ: ${limit_speed}"
+  echo "-------------------------------"
+
 # giới hạn thiết bị
   read -p " Giới hạn thiết bị (Limit):" limit
   [ -z "${limit}" ] && limit=0
@@ -209,6 +216,7 @@ Nodes:
 EOF
   sed -i "s|NodeID:.*|NodeID: ${node_id}|" ./config.yml
   sed -i "s|DeviceLimit:.*|DeviceLimit: ${limit}|" ./config.yml
+  sed -i "s|SpeedLimit:.*|SpeedLimit: ${limit_speed}|" ./config.yml
 }
 
 # Install docker and docker compose
